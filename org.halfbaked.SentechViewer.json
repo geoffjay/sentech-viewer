@@ -1,7 +1,7 @@
 {
     "app-id": "org.halfbaked.SentechViewer",
     "runtime": "org.gnome.Platform",
-    "runtime-version": "3.22",
+    "runtime-version": "3.24",
     "sdk": "org.gnome.Sdk",
     "command": "sentech-viewer",
     "finish-args": [
@@ -15,7 +15,7 @@
         "--env=DCONF_USER_CONFIG_DIR=.config/dconf"
     ],
     "build-options" : {
-        "cflags": "-O2 -g",
+        "cflags": "-O2 -g -I/usr/lib64/glib-2.0/include",
         "cxxflags": "-O2 -g",
         "env": {
             "V": "1"
@@ -47,7 +47,8 @@
                         "type": "git",
                         "url": "https://github.com/geoffjay/sentech-viewer.git"
                     }
-            ]
+            ],
+            "config-opts": ["PKG_CONFIG_PATH=/usr/local/lib/pkgconfig"]
         }
     ]
 }

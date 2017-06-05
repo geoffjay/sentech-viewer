@@ -22,7 +22,8 @@ sentech_viewer_VALAFLAGS = \
 	--pkg gdk-3.0 \
 	--pkg gtk+-3.0 \
 	--pkg posix \
-	--pkg aravis
+	--pkg aravis \
+	--pkg uvc
 
 sentech_viewer_LDADD = $(SENTECH_VIEWER_LIBS)
 

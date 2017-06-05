@@ -93,7 +93,8 @@ AX_CHECK_COMPILE_FLAG([-std=gnu11],
 dnl ***********************************************************************
 dnl Check for required packages
 dnl ***********************************************************************
-PKG_CHECK_MODULES(SENTECH_VIEWER, [gio-2.0 >= 2.50
+PKG_CHECK_MODULES(SENTECH_VIEWER, [glib-2.0 >= 2.50
+                                   gio-2.0 >= 2.50
                                    gtk+-3.0 >= 3.22
                                    aravis-0.6 >= 0.5.10])
 

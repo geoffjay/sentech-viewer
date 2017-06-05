@@ -6,11 +6,13 @@
     <property name="upper">100</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
+    <signal name="value-changed" handler="adj_exposure_value_changed_cb" swapped="no"/>
   </object>
   <object class="GtkAdjustment" id="adj_gain">
     <property name="upper">100</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
+    <signal name="value-changed" handler="adj_gain_value_changed_cb" swapped="no"/>
   </object>
   <template class="SentechWindow" parent="GtkApplicationWindow">
     <property name="can_focus">False</property>
@@ -18,13 +20,14 @@
     <property name="default_width">1440</property>
     <property name="default_height">900</property>
     <property name="icon_name">camera-photo</property>
+    <property name="decorated">False</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkHeaderBar">
+          <object class="GtkHeaderBar" id="header">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="title">Sentech Camera Viewer</property>

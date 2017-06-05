@@ -1,44 +1,17 @@
-/**
- * Three step process because I can't figure out single step.
- *
- * glib-compile-resources --target=resources.c --generate-source sentech.gresource.xml
- *
- * valac --target-glib=2.38 --vapidir=../../vapi/ --pkg aravis --pkg gio-2.0 \
- *   --pkg gdk-3.0 --pkg gtk+-3.0 --pkg posix --gresources=sentech.gresource.xml \
- *   -C sentech-test.vala window.vala colorspaces.c
- *
- * gcc -o sentech-test `pkg-config --cflags --libs aravis-0.6 gio-2.0 gdk-3.0 gtk+-3.0` \
- *   sentech-test.c window.c colorspaces.c resources.c
- */
 public class App : Gtk.Application {
 
     private SentechWindow window;
     private Arv.Camera camera;
     private Arv.Stream stream;
-    private Arv.Device device;
-    //private Gtk.Image image;
-    private bool cancel = false;
     private int fps = 0;
-    private uint8[] rgb;
-    private uint8[] data;
-    private int width;
-    private int height;
 
-    public App () {
-        Object (application_id: "org.coanda.sentech",
+    internal App () {
+        Object (application_id: "org.halfbaked.SentechViewer",
                 flags: ApplicationFlags.FLAGS_NONE);
 
         /* Get the camera instance */
         Arv.update_device_list ();
         camera = new Arv.Camera (Arv.get_device_id (0));
-        camera.get_sensor_size (out width, out height);
-        data = new uint8[width * height];
-        rgb = new uint8[width * height * 3];
-
-        Unix.signal_add (Posix.SIGINT, () => {
-            cancel = true;
-            return true;
-        });
     }
 
     ~App () {
@@ -48,14 +21,14 @@ public class App : Gtk.Application {
     }
 
     protected override void activate () {
-        window = new SentechWindow (this);
+        window = new SentechWindow (this, camera);
+        Gtk.Settings.get_default ().gtk_application_prefer_dark_theme = true;
         window.show_all ();
 
         if (camera != null) {
             camera.set_frame_rate (1);
             uint payload = camera.get_payload ();
             stream = camera.create_stream (null);
-            device = camera.get_device ();
 
             if (stream != null) {
                 for (int i = 0; i < 50; i++) {
@@ -76,16 +49,17 @@ public class App : Gtk.Application {
                 fps++;
             }
 
-            width = buffer.get_image_width ();
-            height = buffer.get_image_height ();
+            var width = buffer.get_image_width ();
+            var height = buffer.get_image_height ();
+            var data = new uint8[width * height];
+            var rgb = new uint8[width * height * 3];
             Posix.memcpy (data, buffer.get_data (), width * height);
 
             /* Use the GUvc method to convert BA81 to RGB3 */
             Uvc.bayer_to_rgb24 (data, rgb, width, height, 3);
 
             var pixbuf = new Gdk.Pixbuf.from_data (rgb, Gdk.Colorspace.RGB, false, 8, width, height, width * 3);
-            window.img_capture.set_from_pixbuf (pixbuf);
-            window.img_capture.queue_draw ();
+            window.set_image (pixbuf);
 
             /* Perform image processing here */
 
@@ -103,7 +77,6 @@ public class App : Gtk.Application {
         int64[] pixel_format_vals = camera.get_available_pixel_formats ();
 
         camera.get_sensor_size (out width, out height);
-        //device.get_integer_feature_bounds ("Zoom", out min, out max);
 
         builder.append ("Testing device " + Arv.get_device_model (0) +
                         " from " + Arv.get_device_vendor (0) + "\n\n");
@@ -127,12 +100,4 @@ public class App : Gtk.Application {
 
         return app.run (args);
     }
-}
-
-namespace Uvc {
-    extern void bayer_to_rgb24([CCode (array_length = false)]
-                               uint8[] pBay,
-                               [CCode (array_length = false)]
-                               uint8[] pRGB24,
-                               int width, int height, int pix_order);
 }
