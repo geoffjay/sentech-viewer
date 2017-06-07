@@ -253,19 +253,11 @@
                 <property name="can_focus">True</property>
                 <property name="shadow_type">in</property>
                 <child>
-                  <object class="GtkViewport">
+                  <object class="GtkViewport" id="viewport">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkImage" id="img_capture">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="margin_left">2</property>
-                        <property name="margin_right">2</property>
-                        <property name="margin_top">2</property>
-                        <property name="margin_bottom">2</property>
-                        <property name="stock">gtk-missing-image</property>
-                      </object>
+                      <placeholder/>
                     </child>
                   </object>
                 </child>

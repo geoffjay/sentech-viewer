@@ -1,10 +1,15 @@
-[GtkTemplate (ui="/org/coanda/Sentech/window.ui")]
+[GtkTemplate (ui="/org/halfbaked/Sentech/window.ui")]
 public class SentechWindow : Gtk.ApplicationWindow {
 
     private Arv.Camera camera;
 
+    private Clutter.Image image;
+
+    //[GtkChild]
+    //public Gtk.Image img_capture;
+
     [GtkChild]
-    public Gtk.Image img_capture;
+    private Gtk.Viewport viewport;
 
     [GtkChild]
     private Gtk.HeaderBar header;
@@ -51,29 +56,74 @@ public class SentechWindow : Gtk.ApplicationWindow {
         adj_gain.lower = gain_min;
         adj_gain.upper = gain_max;
         adj_gain.value = gain;
-    }
 
-    private void display_error (string message) {
-        var dialog = new Gtk.MessageDialog (this,
-                                            Gtk.DialogFlags.MODAL,
-                                            Gtk.MessageType.ERROR,
-                                            Gtk.ButtonsType.OK,
-                                            message);
-        dialog.response.connect ((response_id) => {
-            debug ("Error acknowledged");
-            dialog.destroy ();
-            return;
-        });
-        dialog.show ();
+        var embed = new GtkClutter.Embed ();
+        viewport.add (embed);
+        var stage = embed.get_stage ();
+        image = new Clutter.Image ();
+        var actor = new Clutter.Actor ();
+        actor.content = image;
+        stage.add_child (actor);
+        //stage.content = image;
     }
 
     public void set_image (Gdk.Pixbuf pixbuf) {
-        lock (img_capture) {
-            img_capture.set_from_pixbuf (pixbuf);
+        //lock (img_capture) {
+            //img_capture.set_from_pixbuf (pixbuf);
+        //}
+    }
+
+    public void set_image_data (Gdk.Pixbuf pixbuf) {
+        lock (image) {
+            unowned uint8[] pixels = pixbuf.get_pixels_with_length ();
+            assert (pixels.length == pixbuf.width * pixbuf.height * 3);
+            /*
+             *message ("length: %d", pixels.length);
+             *message ("   bps: %d", pixbuf.bits_per_sample);
+             *message (" chans: %d", pixbuf.n_channels);
+             *message (" alpha: %s", pixbuf.has_alpha.to_string ());
+             *message (" width: %d", pixbuf.width);
+             *message ("height: %d", pixbuf.height);
+             *message ("stride: %d", pixbuf.rowstride);
+             */
+            try {
+                image.set_data (pixels,
+                                Cogl.PixelFormat.RGB_888,
+                                pixbuf.width,
+                                pixbuf.height,
+                                pixbuf.rowstride);
+            } catch (Error e) {
+                critical (e.message);
+            }
         }
     }
 
     private void capture_activated_cb (SimpleAction action, Variant? param) {
+/*
+ *        var buffer = stream.try_pop_buffer ();
+ *        if (buffer != null) {
+ *            if (buffer.get_status () == Arv.BufferStatus.SUCCESS) {
+ *                fps++;
+ *            }
+ *
+ *            var width = buffer.get_image_width ();
+ *            var height = buffer.get_image_height ();
+ *            var data = new uint8[width * height];
+ *            var rgb = new uint8[width * height * 3];
+ *            Posix.memcpy (data, buffer.get_data (), width * height);
+ *
+ *            [> Use the GUvc method to convert BA81 to RGB3 <]
+ *            Uvc.bayer_to_rgb24 (data, rgb, width, height, 3);
+ *
+ *            var pixbuf = new Gdk.Pixbuf.from_data (rgb, Gdk.Colorspace.RGB, false, 8, width, height, width * 3);
+ *            set_image (pixbuf);
+ *
+ *            [> Perform image processing here <]
+ *
+ *            [> XXX Not sure why this is necessary <]
+ *            stream.push_buffer (buffer);
+ *        }
+ */
     }
 
     [GtkCallback]

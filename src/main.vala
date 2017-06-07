@@ -4,6 +4,7 @@ public class App : Gtk.Application {
     private Arv.Camera camera;
     private Arv.Stream stream;
     private int fps = 0;
+    private bool busy = false;
 
     internal App () {
         Object (application_id: "org.halfbaked.SentechViewer",
@@ -44,7 +45,9 @@ public class App : Gtk.Application {
 
     private void new_buffer_cb () {
         var buffer = stream.try_pop_buffer ();
-        if (buffer != null) {
+        if (buffer != null && !busy) {
+            busy = true;
+
             if (buffer.get_status () == Arv.BufferStatus.SUCCESS) {
                 fps++;
             }
@@ -59,12 +62,15 @@ public class App : Gtk.Application {
             Uvc.bayer_to_rgb24 (data, rgb, width, height, 3);
 
             var pixbuf = new Gdk.Pixbuf.from_data (rgb, Gdk.Colorspace.RGB, false, 8, width, height, width * 3);
-            window.set_image (pixbuf);
+            //window.set_image (pixbuf);
+            window.set_image_data (pixbuf);
 
             /* Perform image processing here */
 
             /* XXX Not sure why this is necessary */
             stream.push_buffer (buffer);
+
+            busy = false;
         }
     }
 
@@ -95,6 +101,8 @@ public class App : Gtk.Application {
     }
 
     public static int main(string[] args) {
+        GtkClutter.init (ref args);
+
         var app = new App ();
         app.test ();
 
