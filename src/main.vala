@@ -2,9 +2,9 @@ public class App : Gtk.Application {
 
     private SentechWindow window;
     private Arv.Camera camera;
-    private Arv.Stream stream;
-    private int fps = 0;
-    private bool busy = false;
+    //private Arv.Stream stream;
+    //private int fps = 0;
+    //private bool busy = false;
 
     internal App () {
         Object (application_id: "org.halfbaked.SentechViewer",
@@ -15,64 +15,64 @@ public class App : Gtk.Application {
         camera = new Arv.Camera (Arv.get_device_id (0));
     }
 
-    ~App () {
-        if (camera != null) {
-            camera.stop_acquisition ();
-        }
-    }
+    //~App () {
+        //if (camera != null) {
+            //camera.stop_acquisition ();
+        //}
+    //}
 
     protected override void activate () {
         window = new SentechWindow (this, camera);
         Gtk.Settings.get_default ().gtk_application_prefer_dark_theme = true;
         window.show_all ();
 
-        if (camera != null) {
-            camera.set_frame_rate (1);
-            uint payload = camera.get_payload ();
-            stream = camera.create_stream (null);
+        //if (camera != null) {
+            //camera.set_frame_rate (1);
+            //uint payload = camera.get_payload ();
+            //stream = camera.create_stream (null);
 
-            if (stream != null) {
-                for (int i = 0; i < 50; i++) {
-                    stream.push_buffer (new Arv.Buffer (payload, null));
-                }
+            //if (stream != null) {
+                //for (int i = 0; i < 50; i++) {
+                    //stream.push_buffer (new Arv.Buffer (payload, null));
+                //}
 
-                camera.start_acquisition ();
-                stream.new_buffer.connect (new_buffer_cb);
-                stream.set_emit_signals (true);
-            }
-        }
+                //camera.start_acquisition ();
+                //stream.new_buffer.connect (new_buffer_cb);
+                //stream.set_emit_signals (true);
+            //}
+        //}
     }
 
-    private void new_buffer_cb () {
-        var buffer = stream.try_pop_buffer ();
-        if (buffer != null && !busy) {
-            busy = true;
+    //private void new_buffer_cb () {
+        //var buffer = stream.try_pop_buffer ();
+        //if (buffer != null && !busy) {
+            //busy = true;
 
-            if (buffer.get_status () == Arv.BufferStatus.SUCCESS) {
-                fps++;
-            }
+            //if (buffer.get_status () == Arv.BufferStatus.SUCCESS) {
+                //fps++;
+            //}
 
-            var width = buffer.get_image_width ();
-            var height = buffer.get_image_height ();
-            var data = new uint8[width * height];
-            var rgb = new uint8[width * height * 3];
-            Posix.memcpy (data, buffer.get_data (), width * height);
+            //var width = buffer.get_image_width ();
+            //var height = buffer.get_image_height ();
+            //var data = new uint8[width * height];
+            //var rgb = new uint8[width * height * 3];
+            //Posix.memcpy (data, buffer.get_data (), width * height);
 
-            /* Use the GUvc method to convert BA81 to RGB3 */
-            Uvc.bayer_to_rgb24 (data, rgb, width, height, 3);
+            //[> Use the GUvc method to convert BA81 to RGB3 <]
+            //Uvc.bayer_to_rgb24 (data, rgb, width, height, 3);
 
-            var pixbuf = new Gdk.Pixbuf.from_data (rgb, Gdk.Colorspace.RGB, false, 8, width, height, width * 3);
-            //window.set_image (pixbuf);
-            window.set_image_data (pixbuf);
+            //var pixbuf = new Gdk.Pixbuf.from_data (rgb, Gdk.Colorspace.RGB, false, 8, width, height, width * 3);
+            ////window.set_image (pixbuf);
+            //window.set_image_data (pixbuf);
 
-            /* Perform image processing here */
+            //[> Perform image processing here <]
 
-            /* XXX Not sure why this is necessary */
-            stream.push_buffer (buffer);
+            //[> XXX Not sure why this is necessary <]
+            //stream.push_buffer (buffer);
 
-            busy = false;
-        }
-    }
+            //busy = false;
+        //}
+    //}
 
     public void test () {
         var builder = new StringBuilder ();

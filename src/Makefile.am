@@ -11,6 +11,11 @@ sentech_viewer_SOURCES = \
 	$(BUILT_SOURCES) \
 	main.vala \
 	window.vala \
+	gc-boolean-edit.vala \
+	gc-enum-edit.vala \
+	gc-float-edit.vala \
+	gc-integer-edit.vala \
+	gc-string-edit.vala \
 	colorspaces.c
 
 sentech_viewer_CPPFLAGS = $(SENTECH_VIEWER_CFLAGS)

@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/org/halfbaked/Sentech">
-    <file preprocess="xml-stripblanks" compressed="true">window.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/window.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/gc-boolean-edit.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/gc-enum-edit.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/gc-float-edit.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/gc-string-edit.ui</file>
+    <file preprocess="xml-stripblanks" compressed="true">ui/gc-integer-edit.ui</file>
+    <file>style.css</file>
   </gresource>
 </gresources>
