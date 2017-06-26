@@ -17,6 +17,8 @@ public class SentechWindow : Gtk.ApplicationWindow {
 
     private Arv.Device device;
 
+    private Arv.Stream stream;
+
     private GtkClutter.Embed embed;
 
     private GcFeature[] features = {
@@ -64,6 +66,23 @@ public class SentechWindow : Gtk.ApplicationWindow {
         Object (application: application);
 
         this.camera = camera;
+
+        if (camera != null) {
+            camera.set_frame_rate (1);
+            uint payload = camera.get_payload ();
+            stream = camera.create_stream (null);
+
+            if (stream != null) {
+                for (int i = 0; i < 50; i++) {
+                    stream.push_buffer (new Arv.Buffer (payload, null));
+                }
+
+                camera.start_acquisition ();
+                //stream.new_buffer.connect (new_buffer_cb);
+                //stream.set_emit_signals (true);
+            }
+        }
+
         device = camera.get_device ();
         device.set_string_feature_value ("ExposureMode", "Timed");
         device.set_string_feature_value ("BalanceWhiteAuto", "Continuous");
@@ -160,12 +179,6 @@ public class SentechWindow : Gtk.ApplicationWindow {
         }
     }
 
-    public void set_image (Gdk.Pixbuf pixbuf) {
-        //lock (img_capture) {
-            //img_capture.set_from_pixbuf (pixbuf);
-        //}
-    }
-
     public void set_image_data (Gdk.Pixbuf pixbuf) {
         var image = new Clutter.Image ();
             try {
@@ -200,14 +213,13 @@ public class SentechWindow : Gtk.ApplicationWindow {
             stdout.printf (" > %s\n", val);
         }
 
-        //var buffer = stream.try_pop_buffer ();
-        var buffer = camera.acquisition (1000000);
+        Arv.Buffer buffer = stream.try_pop_buffer ();
+        //var buffer = camera.acquisition (1000000);
         if (buffer != null) {
-            /*
-             *if (buffer.get_status () == Arv.BufferStatus.SUCCESS) {
-             *    fps++;
-             *}
-             */
+            if (buffer.get_status () == Arv.BufferStatus.SUCCESS) {
+                //fps++;
+                debug ("Successfully read buffer");
+            }
 
             var width = buffer.get_image_width ();
             var height = buffer.get_image_height ();
@@ -224,7 +236,7 @@ public class SentechWindow : Gtk.ApplicationWindow {
             /* Perform image processing here */
 
             /* XXX Not sure why this is necessary */
-            //stream.push_buffer (buffer);
+            stream.push_buffer (buffer);
         }
     }
 
