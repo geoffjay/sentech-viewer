@@ -142,7 +142,7 @@ public class SentechWindow : Gtk.ApplicationWindow {
                 popover.relative_to = lbl_value;
                 lbl_value.button_release_event.connect ((event) => {
                     message ("suck it trebek!");
-                    popover.popup ();
+                    //popover.popup ();
                     return false;
                 });
                 (popover as GcBooleanEdit).btn_value.active = value;
@@ -201,7 +201,7 @@ public class SentechWindow : Gtk.ApplicationWindow {
         }
 
         //var buffer = stream.try_pop_buffer ();
-        var buffer = camera.acquisition (0);
+        var buffer = camera.acquisition (1000000);
         if (buffer != null) {
             /*
              *if (buffer.get_status () == Arv.BufferStatus.SUCCESS) {

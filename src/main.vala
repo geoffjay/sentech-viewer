@@ -104,7 +104,7 @@ public class App : Gtk.Application {
         GtkClutter.init (ref args);
 
         var app = new App ();
-        app.test ();
+        //app.test ();
 
         return app.run (args);
     }
