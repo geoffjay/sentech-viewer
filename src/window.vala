@@ -15,19 +15,12 @@ public class SentechWindow : Gtk.ApplicationWindow {
 
     private Arv.Camera camera;
 
-    private Arv.Device device;
-
-    private Arv.Stream stream;
-
     private GtkClutter.Embed embed;
 
     private GcFeature[] features = {
         GcFeature ("PixelCorrectionAllEnabled", "Pixel Correction All", typeof (bool)),
         GcFeature ("PixelCorrectionEnabled", "Pixel Correction Index", typeof (bool))
     };
-
-    //[GtkChild]
-    //public Gtk.Image img_capture;
 
     [GtkChild]
     private Gtk.Viewport viewport;
@@ -67,29 +60,9 @@ public class SentechWindow : Gtk.ApplicationWindow {
 
         this.camera = camera;
 
-        if (camera != null) {
-            camera.set_frame_rate (1);
-            uint payload = camera.get_payload ();
-            stream = camera.create_stream (null);
-
-            if (stream != null) {
-                for (int i = 0; i < 50; i++) {
-                    stream.push_buffer (new Arv.Buffer (payload, null));
-                }
-
-                camera.start_acquisition ();
-                //stream.new_buffer.connect (new_buffer_cb);
-                //stream.set_emit_signals (true);
-            }
-        }
-
-        device = camera.get_device ();
+        var device = camera.get_device ();
         device.set_string_feature_value ("ExposureMode", "Timed");
         device.set_string_feature_value ("BalanceWhiteAuto", "Continuous");
-
-        var capture_action = new SimpleAction ("capture", null);
-        capture_action.activate.connect (capture_activated_cb);
-        application.add_action (capture_action);
 
         /* Setup interface from camera values */
         header.subtitle = camera.get_model_name ();
@@ -142,6 +115,7 @@ public class SentechWindow : Gtk.ApplicationWindow {
     }
 
     private void add_features () {
+        var device = camera.get_device ();
         foreach (var feature in features) {
             Gtk.Popover popover;
             Gtk.Label lbl_value;
@@ -179,65 +153,19 @@ public class SentechWindow : Gtk.ApplicationWindow {
         }
     }
 
-    public void set_image_data (Gdk.Pixbuf pixbuf) {
+    public void set_image (Gdk.Pixbuf pixbuf) {
         var image = new Clutter.Image ();
-            try {
-                image.set_data (pixbuf.get_pixels (),
-                                Cogl.PixelFormat.RGB_888,
-                                pixbuf.width,
-                                pixbuf.height,
-                                pixbuf.rowstride);
-            } catch (Error e) {
-                critical (e.message);
-            }
-        //}
+        try {
+            image.set_data (pixbuf.get_pixels (),
+                            Cogl.PixelFormat.RGB_888,
+                            pixbuf.width,
+                            pixbuf.height,
+                            pixbuf.rowstride);
+        } catch (Error e) {
+            critical (e.message);
+        }
         var stage = embed.get_stage ();
         stage.content = image;
-    }
-
-    private void capture_activated_cb (SimpleAction action, Variant? param) {
-        var exp_mode = device.get_string_feature_value ("ExposureMode");
-        var exp_time = device.get_float_feature_value ("ExposureTime");
-        var exp_auto = device.get_boolean_feature_value ("ExposureAuto");
-        stdout.printf ("Exposure mode: %s\n", exp_mode);
-        stdout.printf ("Exposure time: %f\n", exp_time);
-        stdout.printf ("Exposure auto: %s\n", exp_auto.to_string ());
-        var bal_lev = device.get_float_feature_value ("BalanceLevel");
-        var bal_rat = device.get_float_feature_value ("BalanceRatio");
-        var bal_auto = device.get_boolean_feature_value ("BalanceWhiteAuto");
-        stdout.printf ("Balance level: %f\n", bal_lev);
-        stdout.printf ("Balance ratio: %f\n", bal_rat);
-        stdout.printf ("Balance auto: %s\n", bal_auto.to_string ());
-        var wb_enum = device.get_available_enumeration_feature_values_as_strings ("BalanceWhiteAuto");
-        foreach (var val in wb_enum) {
-            stdout.printf (" > %s\n", val);
-        }
-
-        Arv.Buffer buffer = stream.try_pop_buffer ();
-        //var buffer = camera.acquisition (1000000);
-        if (buffer != null) {
-            if (buffer.get_status () == Arv.BufferStatus.SUCCESS) {
-                //fps++;
-                debug ("Successfully read buffer");
-            }
-
-            var width = buffer.get_image_width ();
-            var height = buffer.get_image_height ();
-            var data = new uint8[width * height];
-            var rgb = new uint8[width * height * 3];
-            Posix.memcpy (data, buffer.get_data (), width * height);
-
-            /* Use the GUvc method to convert BA81 to RGB3 */
-            Uvc.bayer_to_rgb24 (data, rgb, width, height, 3);
-
-            var pixbuf = new Gdk.Pixbuf.from_data (rgb, Gdk.Colorspace.RGB, false, 8, width, height, width * 3);
-            set_image_data (pixbuf);
-
-            /* Perform image processing here */
-
-            /* XXX Not sure why this is necessary */
-            stream.push_buffer (buffer);
-        }
     }
 
     [GtkCallback]

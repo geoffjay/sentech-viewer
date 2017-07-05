@@ -45,6 +45,16 @@
                   <class name="suggested-action"/>
                 </style>
               </object>
+              <object class="GtkToggleButton" id="btn_acquire">
+                <property name="label" translatable="yes">Acquire</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="action_name">app.acquire</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
+              </object>
             </child>
           </object>
           <packing>

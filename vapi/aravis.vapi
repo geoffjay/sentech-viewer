@@ -791,7 +791,7 @@ namespace Arv {
 		[CCode (has_construct_function = false)]
 		protected GvStream ();
 		public uint16 get_port ();
-		public void get_statistics (uint64 n_resent_packets, uint64 n_missing_packets);
+		public void get_statistics (out uint64 n_resent_packets, out uint64 n_missing_packets);
 		[NoAccessorMethod]
 		public uint frame_retention { get; set; }
 		[NoAccessorMethod]
