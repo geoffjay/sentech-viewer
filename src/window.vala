@@ -125,24 +125,26 @@ public class SentechWindow : Gtk.ApplicationWindow {
             size_group.add_widget (lbl_name);
             box.add (lbl_name);
             if (feature.feature_type == typeof (bool)) {
-                var value = device.get_boolean_feature_value (feature.feature);
-                lbl_value = new Gtk.Label (value.to_string ());
-                lbl_value.expand = true;
-                lbl_value.justify = Gtk.Justification.RIGHT;
-                lbl_value.xalign = 1.0f;
-                lbl_value.xpad = 5;
-                popover = new GcBooleanEdit ();
-                popover.relative_to = lbl_value;
-                lbl_value.button_release_event.connect ((event) => {
-                    message ("suck it trebek!");
-                    //popover.popup ();
-                    return false;
-                });
-                (popover as GcBooleanEdit).btn_value.active = value;
-                popover.closed.connect (() => {
-                    lbl_value.label = (popover as GcBooleanEdit).btn_value.active.to_string ();
-                });
-                box.add (lbl_value);
+                /*
+                 *var value = device.get_boolean_feature_value (feature.feature);
+                 *lbl_value = new Gtk.Label (value.to_string ());
+                 *lbl_value.expand = true;
+                 *lbl_value.justify = Gtk.Justification.RIGHT;
+                 *lbl_value.xalign = 1.0f;
+                 *lbl_value.xpad = 5;
+                 *popover = new GcBooleanEdit ();
+                 *popover.relative_to = lbl_value;
+                 *lbl_value.button_release_event.connect ((event) => {
+                 *    message ("suck it trebek!");
+                 *    //popover.popup ();
+                 *    return false;
+                 *});
+                 *(popover as GcBooleanEdit).btn_value.active = value;
+                 *popover.closed.connect (() => {
+                 *    lbl_value.label = (popover as GcBooleanEdit).btn_value.active.to_string ();
+                 *});
+                 *box.add (lbl_value);
+                 */
             } else if (feature.feature_type == typeof (float)) {
             } else if (feature.feature_type == typeof (int)) {
             } else if (feature.feature_type == typeof (string)) {

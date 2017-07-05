@@ -106,11 +106,14 @@ public class App : Gtk.Application {
             builder.append_printf ("gv packet size: ........ %u bytes\n", camera.gv_get_packet_size ());
         }
 
-        if (camera.is_uv_device ()) {
-            uint min, max;
-            camera.uv_get_bandwidth_bounds (out min, out max);
-            builder.append_printf ("uv bandwidth limit: .... %u [%u..%u]\n", camera.uv_get_bandwidth (), min, max);
-        }
+        /*
+         *[> Doesn't work with Aravis < 0.6.0 <]
+         *if (camera.is_uv_device ()) {
+         *    uint min, max;
+         *    camera.uv_get_bandwidth_bounds (out min, out max);
+         *    builder.append_printf ("uv bandwidth limit: .... %u [%u..%u]\n", camera.uv_get_bandwidth (), min, max);
+         *}
+         */
 
         debug ("\n\n%s", builder.str);
     }
@@ -165,8 +168,10 @@ public class App : Gtk.Application {
             /* Use the GUvc method to convert BA81 to RGB3 */
             Uvc.bayer_to_rgb24 (data, rgb, width, height, 3);
 
-            var pixbuf = new Gdk.Pixbuf.from_data (rgb, Gdk.Colorspace.RGB, false, 8, width, height, width * 3);
-            window.set_image (pixbuf);
+            /*
+             *var pixbuf = new Gdk.Pixbuf.from_data (rgb, Gdk.Colorspace.RGB, false, 8, width, height, width * 3);
+             *window.set_image (pixbuf);
+             */
 
             stream.push_buffer (buffer);
         }
@@ -190,6 +195,7 @@ public class App : Gtk.Application {
         } else {
             debug ("Deactivating camera acquisition");
         }
+        this.release ();
     }
 
     private void capture_activated_cb (SimpleAction action, Variant? param) {
@@ -197,16 +203,22 @@ public class App : Gtk.Application {
 
         var exp_mode = device.get_string_feature_value ("ExposureMode");
         var exp_time = device.get_float_feature_value ("ExposureTime");
-        var exp_auto = device.get_boolean_feature_value ("ExposureAuto");
         stdout.printf ("Exposure mode: %s\n", exp_mode);
         stdout.printf ("Exposure time: %f\n", exp_time);
-        stdout.printf ("Exposure auto: %s\n", exp_auto.to_string ());
+        /*
+         *[> Doesn't work in Aravis < 0.6.0 <]
+         *var exp_auto = device.get_boolean_feature_value ("ExposureAuto");
+         *stdout.printf ("Exposure auto: %s\n", exp_auto.to_string ());
+         */
         var bal_lev = device.get_float_feature_value ("BalanceLevel");
         var bal_rat = device.get_float_feature_value ("BalanceRatio");
-        var bal_auto = device.get_boolean_feature_value ("BalanceWhiteAuto");
         stdout.printf ("Balance level: %f\n", bal_lev);
         stdout.printf ("Balance ratio: %f\n", bal_rat);
-        stdout.printf ("Balance auto: %s\n", bal_auto.to_string ());
+        /*
+         *[> Doesn't work in Aravis < 0.6.0 <]
+         *var bal_auto = device.get_boolean_feature_value ("BalanceWhiteAuto");
+         *stdout.printf ("Balance auto: %s\n", bal_auto.to_string ());
+         */
         var wb_enum = device.get_available_enumeration_feature_values_as_strings ("BalanceWhiteAuto");
         foreach (var val in wb_enum) {
             stdout.printf (" > %s\n", val);

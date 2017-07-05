@@ -45,6 +45,8 @@
                   <class name="suggested-action"/>
                 </style>
               </object>
+            </child>
+            <child>
               <object class="GtkToggleButton" id="btn_acquire">
                 <property name="label" translatable="yes">Acquire</property>
                 <property name="visible">True</property>
@@ -55,6 +57,9 @@
                   <class name="suggested-action"/>
                 </style>
               </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
             </child>
           </object>
           <packing>
