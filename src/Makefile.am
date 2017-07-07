@@ -29,7 +29,7 @@ sentech_viewer_VALAFLAGS = \
 	--pkg clutter-gtk-1.0 \
 	--pkg cogl-1.0 \
 	--pkg posix \
-	--pkg aravis-0.6 \
+	--pkg aravis \
 	--pkg uvc
 
 sentech_viewer_LDADD = $(SENTECH_VIEWER_LIBS)

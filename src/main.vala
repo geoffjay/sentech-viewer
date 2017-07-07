@@ -16,9 +16,13 @@ public class App : Gtk.Application {
     private SentechWindow window;
     private Arv.Camera camera;
     private Arv.Stream stream;
+    private Arv.Buffer buffer;
     private int buffer_count = 0;
     private SimpleAction acquire_action;
     private SimpleAction capture_action;
+    private bool updating_image = false;
+
+    private int n = 0;
 
     internal App () {
         Object (application_id: "org.halfbaked.SentechViewer",
@@ -67,27 +71,31 @@ public class App : Gtk.Application {
      */
 
     private void new_buffer_cb () {
-        var buffer = stream.try_pop_buffer ();
-        if (buffer != null) {
-            if (buffer.get_status () == Arv.BufferStatus.SUCCESS) {
-                buffer_count++;
+        if (!updating_image) {
+            buffer = stream.try_pop_buffer ();
+            if (buffer != null) {
+                if (buffer.get_status () == Arv.BufferStatus.SUCCESS) {
+                    buffer_count++;
+                }
+
+/*
+ *                var width = buffer.get_image_width ();
+ *                var height = buffer.get_image_height ();
+ *                var data = new uint8[width * height];
+ *                var rgb = new uint8[width * height * 3];
+ *                Posix.memcpy (data, buffer.get_data (), width * height);
+ *
+ *                [> Use the GUvc method to convert BA81 to RGB3 <]
+ *                Uvc.bayer_to_rgb24 (data, rgb, width, height, 3);
+ *
+ *                updating_image = true;
+ *                var pixbuf = new Gdk.Pixbuf.from_data (rgb, Gdk.Colorspace.RGB, false, 8, width, height, width * 3);
+ *                window.set_image (pixbuf.copy ());
+ *                updating_image = false;
+ */
+
+                stream.push_buffer (buffer);
             }
-
-            var width = buffer.get_image_width ();
-            var height = buffer.get_image_height ();
-            var data = new uint8[width * height];
-            var rgb = new uint8[width * height * 3];
-            Posix.memcpy (data, buffer.get_data (), width * height);
-
-            /* Use the GUvc method to convert BA81 to RGB3 */
-            Uvc.bayer_to_rgb24 (data, rgb, width, height, 3);
-
-            /*
-             *var pixbuf = new Gdk.Pixbuf.from_data (rgb, Gdk.Colorspace.RGB, false, 8, width, height, width * 3);
-             *window.set_image (pixbuf);
-             */
-
-            stream.push_buffer (buffer);
         }
     }
 
@@ -160,10 +168,11 @@ public class App : Gtk.Application {
     }
 
     private void capture_activated_cb (SimpleAction action, Variant? param) {
-        var buffer = camera.acquisition (0);
+        //var buffer = camera.acquisition (0);
+        updating_image = true;
+        //var buffer = stream.try_pop_buffer ();
         if (buffer != null) {
             if (buffer.get_status () == Arv.BufferStatus.SUCCESS) {
-                //fps++;
                 debug ("Successfully read buffer");
             }
 
@@ -178,7 +187,10 @@ public class App : Gtk.Application {
 
             var pixbuf = new Gdk.Pixbuf.from_data (rgb, Gdk.Colorspace.RGB, false, 8, width, height, width * 3);
             window.set_image (pixbuf);
+
+            stream.push_buffer (buffer);
         }
+        updating_image = false;
     }
 
     private void dump_camera_settings () {
