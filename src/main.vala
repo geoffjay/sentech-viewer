@@ -1,3 +1,4 @@
+[DBus (name = "org.halfbaked.Sentech")]
 public class App : Gtk.Application {
 
     private static string? opt_debug = null;
@@ -25,8 +26,15 @@ public class App : Gtk.Application {
     private int n = 0;
 
     internal App () {
-        Object (application_id: "org.halfbaked.SentechViewer",
+        Object (application_id: "org.halfbaked.Sentech",
                 flags: ApplicationFlags.FLAGS_NONE);
+
+        Bus.own_name (BusType.SESSION,
+                      "org.halfbaked.Sentech",
+                      BusNameOwnerFlags.NONE,
+                      bus_acquired_cb,
+                      () => {},
+                      () => { critical ("Could not acquire name"); });
 
         /* Get the camera instance */
         //Arv.update_device_list ();
@@ -58,6 +66,14 @@ public class App : Gtk.Application {
 
     protected override void shutdown () {
         base.shutdown ();
+    }
+
+    private void bus_acquired_cb (DBusConnection connection) {
+        try {
+            connection.register_object ("/org/halfbaked/sentech", this);
+        } catch (IOError error) {
+            warning ("Could not register service: %s", error.message);
+        }
     }
 
     /*
@@ -106,6 +122,14 @@ public class App : Gtk.Application {
         }
 
         return true;
+    }
+
+    public void acquire (bool state) {
+        acquire_action.activate (new Variant.boolean (state));
+    }
+
+    public void capture () {
+        capture_action.activate (null);
     }
 
     private void acquire_activated_cb (SimpleAction action, Variant? param) {
