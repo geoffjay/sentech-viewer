@@ -2,3 +2,6 @@ build
 .flatpak-builder
 *.swp
 *~
+
+tests/arv-camera-test
+tests/dbus-client

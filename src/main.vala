@@ -25,6 +25,9 @@ public class App : Gtk.Application {
 
     private int n = 0;
 
+    public double exposure_time { get; set; }
+    public double gain { get; set; }
+
     internal App () {
         Object (application_id: "org.halfbaked.Sentech",
                 flags: ApplicationFlags.FLAGS_NONE);
@@ -37,7 +40,6 @@ public class App : Gtk.Application {
                       () => { critical ("Could not acquire name"); });
 
         /* Get the camera instance */
-        //Arv.update_device_list ();
         if (opt_name == null) {
             debug ("Looking for the first available camera");
         } else {
@@ -94,22 +96,6 @@ public class App : Gtk.Application {
                     buffer_count++;
                 }
 
-/*
- *                var width = buffer.get_image_width ();
- *                var height = buffer.get_image_height ();
- *                var data = new uint8[width * height];
- *                var rgb = new uint8[width * height * 3];
- *                Posix.memcpy (data, buffer.get_data (), width * height);
- *
- *                [> Use the GUvc method to convert BA81 to RGB3 <]
- *                Uvc.bayer_to_rgb24 (data, rgb, width, height, 3);
- *
- *                updating_image = true;
- *                var pixbuf = new Gdk.Pixbuf.from_data (rgb, Gdk.Colorspace.RGB, false, 8, width, height, width * 3);
- *                window.set_image (pixbuf.copy ());
- *                updating_image = false;
- */
-
                 stream.push_buffer (buffer);
             }
         }
@@ -117,6 +103,7 @@ public class App : Gtk.Application {
 
     private bool periodic_task_cb () {
         if (stream != null) {
+            capture_action.activate (null);
             debug ("Frame rate: .. %d Hz", buffer_count);
             buffer_count = 0;
         }
@@ -133,7 +120,6 @@ public class App : Gtk.Application {
     }
 
     private void acquire_activated_cb (SimpleAction action, Variant? param) {
-        //this.hold ();
         Variant state = action.get_state ();
         bool active = state.get_boolean ();
         action.set_state (new Variant.boolean (!active));
@@ -188,13 +174,11 @@ public class App : Gtk.Application {
                 stream = null;
             }
         }
-        //this.release ();
     }
 
     private void capture_activated_cb (SimpleAction action, Variant? param) {
         //var buffer = camera.acquisition (0);
         updating_image = true;
-        //var buffer = stream.try_pop_buffer ();
         if (buffer != null) {
             if (buffer.get_status () == Arv.BufferStatus.SUCCESS) {
                 debug ("Successfully read buffer");

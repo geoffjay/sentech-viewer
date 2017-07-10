@@ -94,6 +94,10 @@ public class SentechWindow : Gtk.ApplicationWindow {
         embed = new GtkClutter.Embed ();
         viewport.add (embed);
 
+        /* Bind application properties to controls */
+        adj_exposure.bind_property ("value", application, "exposure-time", BindingFlags.BIDIRECTIONAL);
+        adj_gain.bind_property ("value", application, "gain", BindingFlags.BIDIRECTIONAL);
+
         /* Add styling */
         try {
             var provider = new Gtk.CssProvider ();
